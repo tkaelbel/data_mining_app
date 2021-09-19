@@ -23,7 +23,7 @@
         </div>
 
         <div class="gt-sm">
-          <q-btn flat icon="storage" label="Databases" />
+          <q-btn flat icon="storage" label="Databases" to="/databases" />
           <q-btn flat icon="functions" label="Algorithms" />
           <q-btn flat icon="import_export" label="Import" />
         </div>
@@ -32,7 +32,7 @@
 
     <q-drawer v-model="leftDrawerOpen" bordered :width="200">
       <q-list padding>
-        <q-item clickable>
+        <q-item clickable to="/databases">
           <q-item-section avatar>
             <q-icon name="storage" size="25px" />
           </q-item-section>
