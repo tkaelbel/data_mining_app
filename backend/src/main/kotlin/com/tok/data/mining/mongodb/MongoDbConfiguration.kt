@@ -13,9 +13,8 @@ class MongoDbConfiguration() {
 
     @Bean
     fun getMongoClient(): MongoClient {
-        //TODO:user in system variable
-        val connectionstring = ConnectionString("mongodb+srv://app_user:${System.getenv("ATLAS_DM_PW")}@cluster0.0kxwd.mongodb.net/data_mining?retryWrites=true&w=majority")
-        val settings = MongoClientSettings.builder().applyConnectionString(connectionstring).build()
+        val connectionString = ConnectionString("mongodb+srv://${System.getenv("ATLAS_DM_USER")}:${System.getenv("ATLAS_DM_PW")}@cluster0.0kxwd.mongodb.net/data_mining?retryWrites=true&w=majority")
+        val settings = MongoClientSettings.builder().applyConnectionString(connectionString).build()
 
         return MongoClients.create(settings)
     }

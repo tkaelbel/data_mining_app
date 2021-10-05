@@ -12,14 +12,13 @@ class AlgorithmManager(
 ) {
 
     fun executeAlgorithm(request: AlgorithmRequest): Flux<AlgorithmResponse> {
-        Assert.notNull(request, "request object is null");
-        Assert.notNull(request.name, "algorithName is null");
-        Assert.notNull(request.properties, "properties is null");
-        Assert.notNull(request.databaseName, "databaseName is null");
-        Assert.notNull(request.collectionName, "collectionName is null");
+        Assert.notNull(request, "request object is null")
+        Assert.notNull(request.name, "algorithName is null")
+        Assert.notNull(request.databaseName, "databaseName is null")
+        Assert.notNull(request.collectionName, "collectionName is null")
 
         val algorithm = algorithmFactory.getAlgorithm(AlgorithmName.valueOf(request.name))
-        if(algorithm == null) throw Error("Algorithm ${request.name} was not found")
+            ?: throw Error("Algorithm ${request.name} was not found")
 
         return algorithm.execute(request)
     }

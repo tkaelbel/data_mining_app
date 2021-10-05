@@ -3,6 +3,7 @@ package com.tok.data.mining.controller
 import com.tok.data.mining.mongodb.MongoDbManager
 import com.tok.data.mining.payload.request.CollectionDataRequest
 import com.tok.data.mining.payload.response.CollectionDataResponse
+import com.tok.data.mining.payload.response.FieldResponse
 import com.tok.data.mining.payload.response.DatabaseDataResponse
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
@@ -14,8 +15,9 @@ class DataController(
     val mongoDbManager: MongoDbManager
 ) : IDataController {
 
+    //TODO: Logging
     @GetMapping("/databases")
-    fun databases(): ResponseEntity<List<DatabaseDataResponse>>{
+    fun databases(): ResponseEntity<List<DatabaseDataResponse>> {
         return ResponseEntity.ok(mongoDbManager.getDatabases())
     }
 
@@ -23,6 +25,17 @@ class DataController(
     fun collectionData(request: CollectionDataRequest): ResponseEntity<CollectionDataResponse> {
         val tempPage = request.page ?: 0
         val tempSize = request.size ?: 20
-        return ResponseEntity.ok(mongoDbManager.getCollectionData(request.databaseName, request.collectionName, tempPage, tempSize))
+        return ResponseEntity.ok(
+            mongoDbManager.getCollectionData(
+                request.databaseName,
+                request.collectionName,
+                tempPage,
+                tempSize
+            )
+        )
     }
+
+    @GetMapping("/fields")
+    fun collectionFields(request: CollectionDataRequest): ResponseEntity<FieldResponse> =
+        ResponseEntity.ok(mongoDbManager.determineCollectionColumns(request.databaseName, request.collectionName))
 }

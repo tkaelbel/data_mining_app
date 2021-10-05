@@ -1,9 +1,15 @@
 package com.tok.data.mining.payload.request
 
-data class AlgorithmRequest(val name: String, val properties: AlgorithmProperties, val databaseName: String, val collectionName: String, val columnName: String)
 
-open class AlgorithmProperties(){}
+open class AlgorithmRequest(
+    val name: String,
+    val databaseName: String,
+    val collectionName: String,
+    val columnName: String
+)
 
-class AprioriProperties(val minimumConfidence: Double, val minimumSupport: Double, val itemCount: Int) :
-    AlgorithmProperties() {
-}
+class AprioriRequest(
+    val minimumConfidence: Double, val minimumSupport: Double, val itemCount: Int, name: String,
+    databaseName: String, collectionName: String, columnName: String
+) :
+    AlgorithmRequest(name, databaseName, collectionName, columnName)

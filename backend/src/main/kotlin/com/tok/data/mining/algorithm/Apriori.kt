@@ -2,7 +2,7 @@ package com.tok.data.mining.algorithm
 
 import com.tok.data.mining.mongodb.MongoDbManager
 import com.tok.data.mining.payload.request.AlgorithmRequest
-import com.tok.data.mining.payload.request.AprioriProperties
+import com.tok.data.mining.payload.request.AprioriRequest
 import com.tok.data.mining.payload.response.AlgorithmResponse
 import org.springframework.stereotype.Component
 import reactor.core.publisher.Flux
@@ -20,11 +20,12 @@ class Apriori(
         get() = AlgorithmName.APRIORI
 
     override fun execute(data: AlgorithmRequest): Flux<AlgorithmResponse> {
-        if(data.properties !is AprioriProperties) throw Error("Wrong poperties type")
+        if(data !is AprioriRequest) throw Error("Wrong poperties type")
+
         val keyName = "${data.databaseName}.${data.collectionName}"
 
         aprioriHelper.aprioriWorkModel.set(keyName,
-            AprioriWorkModel(null,null, null, data.properties.minimumSupport, data.properties.minimumConfidence, null))
+            AprioriWorkModel(null,null, null, data.minimumSupport, data.minimumConfidence, null))
 
         return Flux.just(startOrganizeData(data),
             organizeData(data, keyName),

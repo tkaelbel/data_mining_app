@@ -1,6 +1,7 @@
 package com.tok.data.mining.algorithm
 
 import org.springframework.stereotype.Component
+import java.util.*
 
 @Component
 class AlgorithmFactory(
@@ -14,17 +15,13 @@ class AlgorithmFactory(
     }
 
     private fun createAlgorithms(algorithms: Set<IAlgorithm>){
-        createdAlgorithms = HashMap()
+        createdAlgorithms = EnumMap(AlgorithmName::class.java)
         algorithms.forEach {
-            createdAlgorithms.put(it.name, it)
+            createdAlgorithms[it.name] = it
         }
     }
 
-    fun getAlgorithm(name: AlgorithmName): IAlgorithm? {
-        val algorithm = createdAlgorithms.get(name)
+    fun getAlgorithm(name: AlgorithmName): IAlgorithm? =
+        createdAlgorithms[name] ?: throw Error("Algorithm $name was not found")
 
-        if(algorithm == null) throw Error("Algorithm $name was not found")
-
-        return createdAlgorithms.get(name)
-    }
 }

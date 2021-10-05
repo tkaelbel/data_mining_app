@@ -1,20 +1,13 @@
 package com.tok.data.mining.mongodb
 
 import com.mongodb.client.MongoClient
-import com.tok.data.mining.payload.response.CollectionDataResponse
-import com.tok.data.mining.payload.response.DatabaseDataResponse
-import com.tok.data.mining.payload.response.KeyValue
-import com.tok.data.mining.payload.response.Pagination
-import org.bson.BsonDocument
-import org.bson.Document
-import org.bson.conversions.Bson
+import com.tok.data.mining.payload.response.*
 import org.bson.types.ObjectId
 import org.springframework.data.mongodb.core.MongoTemplate
-import org.springframework.data.mongodb.core.aggregation.Aggregation
-import org.springframework.data.mongodb.core.query.BasicQuery
-import org.springframework.data.mongodb.core.query.Criteria
+import org.springframework.data.mongodb.core.find
+import org.springframework.data.mongodb.core.query.Query
 import org.springframework.stereotype.Component
-import org.springframework.util.Assert
+import java.lang.Exception
 import kotlin.collections.ArrayList
 import kotlin.collections.HashSet
 
@@ -24,29 +17,31 @@ class MongoDbManager(
     private val mongoClient: MongoClient
 ) {
 
+    val admin: String = "admin"
+    val local: String = "local"
+
     /**
      * Determines all available mongo db databases
      */
-    fun getDatabases(): List<DatabaseDataResponse> {
-        val models = ArrayList<DatabaseDataResponse>()
-        mongoClient.listDatabaseNames().forEach {
-            models.add(DatabaseDataResponse(it, determineCollectionNames(it)))
-        }
-        return models
-    }
+    fun getDatabases(): List<DatabaseDataResponse> =
+        mongoClient.listDatabaseNames().filter { it != admin && it != local }
+            .map { DatabaseDataResponse(it, determineCollectionNames(it)) }.toList()
 
-    private fun determineCollectionNames(databaseName: String): Set<String> {
-        val collectionNames = HashSet<String>()
-        mongoClient.getDatabase(databaseName).listCollectionNames().forEach {
-            collectionNames.add(it)
+    private fun determineCollectionNames(databaseName: String): Set<String> =
+        mongoClient.getDatabase(databaseName).listCollectionNames().toSet()
+
+    fun determineCollectionColumns(databaseName: String, collectionName: String): FieldResponse {
+        val data = try {
+            mongoClient.getDatabase(databaseName).getCollection(collectionName).find().limit(1)
+        } catch (e: Exception) {
+            println("Something went wrong accessing database: $databaseName and collection: $collectionName")
+            throw e
         }
-        return collectionNames
+        val columns = data.map { it -> it.entries.map { it.key } }.flatten().filter { it != "_id" }.toSet()
+        return FieldResponse(columns)
     }
 
     fun getCollectionData(databaseName: String, collectionName: String, page: Int, size: Int): CollectionDataResponse {
-        Assert.notNull(databaseName, "databaseName cannot be null")
-        Assert.notNull(collectionName, "collectionName cannot be null")
-
         val values = ArrayList<ArrayList<KeyValue>>()
         val columnNames = HashSet<String>()
 
@@ -54,12 +49,12 @@ class MongoDbManager(
         val collection = mongoClient.getDatabase(databaseName).getCollection(collectionName)
 
         val totalCount = collection.countDocuments()
-        val data = collection.find().skip(if (page > 0) ((page - 1) * size) else 0 ).limit(size)
+        val data = collection.find().skip(if (page > 0) ((page - 1) * size) else 0).limit(size)
 
-        data.forEach {
+        data.forEach { document ->
             val formattedData = ArrayList<KeyValue>()
 
-            it.entries.forEach {
+            document.entries.forEach {
                 columnNames.add(it.key)
                 formattedData.add(
                     KeyValue(
@@ -68,29 +63,41 @@ class MongoDbManager(
                             it.value.toString()
                         } else {
                             it.value
-                        })
+                        }),
+                        it.value.javaClass.simpleName
                     )
                 )
             }
             values.add(formattedData)
         }
 
-        return CollectionDataResponse(databaseName, collectionName, columnNames, values, Pagination(page, size, totalCount))
+        return CollectionDataResponse(
+            databaseName,
+            collectionName,
+            columnNames,
+            values,
+            Pagination(page, size, totalCount, totalCount / size)
+        )
     }
 
-    fun determineCollectionColumnData(databaseName: String, collectionName: String, column: String): CollectionColumnDataModel {
-        Assert.notNull(databaseName, "databaseName cannot be null")
-        Assert.notNull(collectionName, "collectionName cannot be null")
-        Assert.notNull(column, "column cannot be null")
-
+    fun determineCollectionColumnData(
+        databaseName: String,
+        collectionName: String,
+        column: String
+    ): CollectionColumnDataModel {
         //TODO: check for catching exception if database or collection does not exist
         val mongoTemplate = MongoTemplate(mongoClient, databaseName)
 
-        val values = mongoTemplate.find(BasicQuery("{}", "${column}: 1, _id: 0"), Document().javaClass, collectionName)
+        val query = Query()
+        query.fields().include(column)
+        query.fields().exclude("_id")
+        val values = mongoTemplate.find<Any>(query, collectionName)
 
-        return  CollectionColumnDataModel(column, values)
+        return CollectionColumnDataModel(column, values)
     }
 
+
+    data class CollectionColumnDataModel(val column: String, val data: List<Any>)
 
 }
 
