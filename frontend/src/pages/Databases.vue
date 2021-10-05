@@ -30,7 +30,7 @@
       <template v-slot:after>
         <div v-if="isCollectionDataFetched">
           <q-tab-panels style="min-height: inherit" v-model="handleTreeClick">
-            <q-tab-panel v-for="name in collectionNames" :name="name">
+            <q-tab-panel v-for="name in collectionNames" :name="name"  v-bind:key="name">
               <div class="text-h4 q-mb-md">{{ selectedCollectionName }}</div>
               <div class="text-h5 q-mb-md">
                 Query Results 1-{{ collectionPaginationData?.size }} of
@@ -51,7 +51,7 @@
               <div
                 v-for="documents in collectionData"
                 v-bind:key="documents"
-                style="border: 1px solid #ccc"
+                style="border: 1px solid #1976d2"
                 class="q-mb-md"
               >
                 <div
@@ -113,7 +113,7 @@ import {
   TreeChildData,
   TreeData,
 } from 'src/components/models';
-import { defineComponent, ref, onMounted } from 'vue';
+import { defineComponent, ref, onMounted} from 'vue';
 import DataService from '../services/DataService';
 
 export default defineComponent({
@@ -239,6 +239,11 @@ export default defineComponent({
 <style lang="scss">
 .document-field-string {
   color: #4682b4;
+  text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+    max-width: 1000px;
+    display: block;
 }
 
 .document-field-date {

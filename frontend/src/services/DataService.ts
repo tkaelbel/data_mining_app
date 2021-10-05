@@ -1,5 +1,5 @@
 import { apiClient } from '../boot/axios';
-import { CollectionData, Database } from 'src/components/models';
+import { CollectionData, Database, Fields } from 'src/components/models';
 import { AxiosResponse } from 'axios';
 
 class DataService {
@@ -7,10 +7,16 @@ class DataService {
     return apiClient.get('/databases');
   }
 
-  async getCollectionData(database: string, collection: string, page?: number): Promise<AxiosResponse<CollectionData>> {
+  async getCollectionData(databaseName: string, collectionName: string, page?: number): Promise<AxiosResponse<CollectionData>> {
     return apiClient.get('/collectionData', {
-      params: { databaseName: database, collectionName: collection , page: page },
+      params: { databaseName, collectionName, page },
     });
+  }
+
+  async getFields(databaseName: string, collectionName: string): Promise<AxiosResponse<Fields>>{
+    return apiClient.get('/fields', {
+      params: { databaseName, collectionName }
+    })
   }
 }
 

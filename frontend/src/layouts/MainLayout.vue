@@ -24,7 +24,21 @@
 
         <div class="gt-sm">
           <q-btn flat icon="storage" label="Databases" to="/databases" />
-          <q-btn flat icon="functions" label="Algorithms" />
+          <q-btn flat icon="functions" label="Algorithms">
+            <q-menu>
+              <q-list style="min-width: 150px">
+                <q-item clickable v-close-popup to="/apriori">
+                  <q-item-section>Apriori</q-item-section>
+                </q-item>
+                <q-item clickable v-close-popup>
+                  <q-item-section>K-Means</q-item-section>
+                </q-item>
+                <q-item clickable v-close-popup>
+                  <q-item-section>K-Nearest-Neighbors</q-item-section>
+                </q-item>
+              </q-list>
+            </q-menu>
+          </q-btn>
           <q-btn flat icon="import_export" label="Import" />
         </div>
       </q-toolbar>

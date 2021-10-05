@@ -36,8 +36,22 @@ export interface Pagination {
   totalCount: number;
 }
 
+export interface Fields {
+  fields: Array<string>;
+}
+
 export interface KeyValue { 
   key: string;
   value: string | number | Date | Record<string, unknown> | Array<Record<string, unknown>>;
   type: string;
+}
+
+export interface AprioriProperties {
+  minimumConfidence: number | undefined;
+  minimumSupport: number | undefined;
+  itemCount: number | undefined;
+}
+
+export enum Algorithm {
+  APRIORI='APRIORI', KMEANS='KMEANS', KNEAREST='KNEAREST' 
 }
