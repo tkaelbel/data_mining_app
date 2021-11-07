@@ -2,9 +2,9 @@
 
 UI to use different data mining algorithms
 
-![database-view](<img/database-view.png?raw=true>)
+![database-view](https://github.com/tkaelbel/data_mining_app/blob/main/frontend/img/database-view.PNG?raw=true>)
 
-![apriori-view](img/apriori-view.png?raw=true)
+![apriori-view](https://github.com/tkaelbel/data_mining_app/blob/main/frontend/img/apriori-view.PNG?raw=true)
 
 ## Install the dependencies
 ```bash
