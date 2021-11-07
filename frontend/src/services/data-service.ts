@@ -1,5 +1,5 @@
 import { apiClient } from '../boot/axios';
-import { CollectionData, Database, Fields } from 'src/components/models';
+import { CollectionData, Database, Fields } from 'src/models/database-models';
 import { AxiosResponse } from 'axios';
 
 class DataService {

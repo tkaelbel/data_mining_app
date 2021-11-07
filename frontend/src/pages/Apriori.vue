@@ -47,7 +47,8 @@
           :decimals="2"
           :rules="[
             (val) => val >= 0 || 'Positive number',
-            (val) => (val && val.length > 0) || 'One number at least',
+            (val) => val >= 0.01 && val <= 1|| 'Number must be between 0 and 1',
+            (val) => (val && val.length > 0)  || 'One number at least',
           ]"
         />
 
@@ -61,6 +62,7 @@
           mask="#.##"
           :rules="[
             (val) => val >= 0 || 'Positive number',
+            (val) => val >= 0.01 && val <= 1|| 'Number must be between 0 and 1',
             (val) => (val && val.length > 0) || 'One number at least',
           ]"
         />
@@ -73,7 +75,7 @@
           lazy-rules
           style="width: 250px; padding-bottom: 32px"
           :rules="[
-            (val) => val >= 0 || 'Positive number',
+            (val) => val > 1 || 'Item count needs to be positive and higher than 1',
             (val) => (val && val.length > 0) || 'One number at least',
           ]"
         />
@@ -90,6 +92,7 @@
 
       <div class="q-pa-md" style="min-width: 80%">
         <q-input
+          id="textArea"
           v-model="textAreaText"
           filled
           type="textarea"
@@ -103,9 +106,10 @@
 
 <script lang="ts">
 import { defineComponent, ref, onMounted, reactive } from 'vue';
-import { Algorithm, AprioriProperties, Database } from 'src/components/models';
-import DataService from 'src/services/DataService';
-import AlgorithmService from 'src/services/AlgorithmService';
+import { Database } from 'src/models/database-models';
+import { AprioriProperties } from 'src/models/algorithm-models';
+import DataService from 'src/services/data-service';
+import AlgorithmService from 'src/services/algorithm-service';
 
 const fieldsStore: Record<string, Array<string>> = {};
 
@@ -149,28 +153,26 @@ export default defineComponent({
 
     const textAreaText = ref<string>('');
 
-    let interval: any;
+    const textArea = ref<Element | null>();
 
     //TODO: array for fields
-    const fetchApriori = async (
-      minimumConfidence: number,
-      minimumSupport: number,
-      itemCount: number,
-      database: string,
-      collection: string,
-      field: string
-    ) => {
+    const fetchApriori = (properties: AprioriProperties) => {
       try {
-        const apriorData = await AlgorithmService.apriori(
-          minimumConfidence,
-          minimumSupport,
-          itemCount,
-          database,
-          collection,
-          field
-        );
+        const createdEventSource = AlgorithmService.apriori(properties);
+        createdEventSource.onmessage = (event: MessageEvent) => {
+          const data = event.data.replaceAll(';', '\n\t');
 
-        textAreaText.value = apriorData.data;
+          //TODO: add close statement
+          if (data.includes('It took')) createdEventSource.close();
+          textAreaText.value =
+            data === ''
+              ? `${textAreaText.value}${data}`
+              : `${textAreaText.value} ${data} \n`;
+
+          if (textArea.value != null)
+            textArea.value.scrollTop =
+              textArea.value.scrollHeight - textArea.value.clientHeight;
+        };
       } catch (e) {
         console.error('Something went wrong fetching data from /apriori');
       }
@@ -188,6 +190,8 @@ export default defineComponent({
         );
 
         collectionSelectValues.push(...collectionValues);
+
+        textArea.value = document.querySelector('.q-textarea textarea');
       } catch (error) {
         console.error(error);
       }
@@ -237,42 +241,24 @@ export default defineComponent({
 
         fieldSelectModel.value.length = 0;
       },
-      async onSubmit() {
-        if (!databaseSelectModel.value) throw new Error('');
-        if (!collectionSelectModel.value) throw new Error('');
-        if (!fieldSelectModel.value) throw new Error('');
+      onSubmit() {
+        textAreaText.value = '';
+        if (!databaseSelectModel.value) throw new Error('databaseSelectModel was empty');
+        if (!collectionSelectModel.value) throw new Error('collectionSelectModel was empty');
+        if (!fieldSelectModel.value) throw new Error('fieldSelectModel was empty');
 
-        if (!minimumConfidence.value) throw new Error('');
-        if (!minimumSupport.value) throw new Error('');
-        if (!itemCount.value) throw new Error('');
+        if (!minimumConfidence.value) throw new Error('minimumConfidence was empty');
+        if (!minimumSupport.value) throw new Error('minimumSupport was empty');
+        if (!itemCount.value) throw new Error('itemCount was empty');
 
-        const tempMinimumConfidence = Number(minimumConfidence.value);
-        const tempMinimumSupport = Number(minimumSupport.value);
-        const tempItemCount = Number(itemCount.value);
-
-        const tempDatabaseName = databaseSelectModel.value;
-        const tempCollectionName = collectionSelectModel.value;
-        const tempFieldName = fieldSelectModel.value[0];
-
-        await fetchApriori(
-          tempMinimumConfidence,
-          tempMinimumSupport,
-          tempItemCount,
-          tempDatabaseName,
-          tempCollectionName,
-          tempFieldName
-        );
-
-        // interval = setInterval(() => fetchApriori(
-        //   {
-        //     minimumConfidence: tempMinimumConfidence,
-        //     minimumSupport: tempMinimumSupport,
-        //     itemCount: tempItemCount,
-        //   },
-        //   tempDatabaseName,
-        //   tempCollectionName,
-        //   tempFieldName,
-        // ), 1000);
+        fetchApriori({
+          minimumConfidence: Number(minimumConfidence.value),
+          minimumSupport: Number(minimumSupport.value),
+          itemCount: Number(itemCount.value),
+          databaseName: databaseSelectModel.value,
+          collectionName: collectionSelectModel.value,
+          columnName: fieldSelectModel.value[0],
+        });
       },
       textAreaText,
       minimumSupport,

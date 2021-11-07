@@ -30,7 +30,11 @@
       <template v-slot:after>
         <div v-if="isCollectionDataFetched">
           <q-tab-panels style="min-height: inherit" v-model="handleTreeClick">
-            <q-tab-panel v-for="name in collectionNames" :name="name"  v-bind:key="name">
+            <q-tab-panel
+              v-for="name in collectionNames"
+              :name="name"
+              v-bind:key="name"
+            >
               <div class="text-h4 q-mb-md">{{ selectedCollectionName }}</div>
               <div class="text-h5 q-mb-md">
                 Query Results 1-{{ collectionPaginationData?.size }} of
@@ -106,19 +110,16 @@
 </template>
 
 <script lang="ts">
-import {
-  Database,
-  KeyValue,
-  Pagination,
-  TreeChildData,
-  TreeData,
-} from 'src/components/models';
-import { defineComponent, ref, onMounted} from 'vue';
-import DataService from '../services/DataService';
+import { Database, KeyValue, Pagination } from 'src/models/database-models';
+import { TreeChildData, TreeData } from 'src/models/gui-models';
+import { defineComponent, ref, onMounted } from 'vue';
+import DataService from '../services/data-service';
 
 export default defineComponent({
   name: 'Databases',
   setup() {
+
+    //TODO: make a component out of the database collection field selection
     const databases = ref();
     const treeData = ref<Array<TreeData>>();
     const collectionData = ref<Array<Array<KeyValue>>>([]);
@@ -201,24 +202,24 @@ export default defineComponent({
 
     const paginationClickHandler = async (event: any) => {
       //Hack to get the number of the clicked page
-      //TODO: maybe find an easier way..
-      const page = event.target.innerText;
+      const page = event?.target?.innerText;
 
-      if(page === "…") return;
+      if (page === '…') return;
 
-      if(!selectedDatabaseName.value || !selectedCollectionName.value) throw new Error("Not possible that data")
+      if (!selectedDatabaseName.value || !selectedCollectionName.value)
+        throw new Error('Not possible that data');
 
       const { data } = await DataService.getCollectionData(
-          selectedDatabaseName.value,
-          selectedCollectionName.value,
-          page,
-        );
+        selectedDatabaseName.value,
+        selectedCollectionName.value,
+        page
+      );
 
-        collectionData.value = [];
-        collectionData.value.push(...data.data);
+      collectionData.value = [];
+      collectionData.value.push(...data.data);
 
-        collectionPaginationData.value = data.pagination;
-    }
+      collectionPaginationData.value = data.pagination;
+    };
 
     return {
       splitterModel: ref(200),
@@ -240,10 +241,10 @@ export default defineComponent({
 .document-field-string {
   color: #4682b4;
   text-overflow: ellipsis;
-    overflow: hidden;
-    white-space: nowrap;
-    max-width: 1000px;
-    display: block;
+  overflow: hidden;
+  white-space: nowrap;
+  max-width: 1000px;
+  display: block;
 }
 
 .document-field-date {
