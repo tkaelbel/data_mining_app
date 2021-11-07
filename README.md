@@ -1,4 +1,4 @@
-# data_mining_app
+# data_mining_app (still in Progress..)
  Full Stack Application to use data mining algorithm on MongoDB collection data.
  
  Currently implemented:
