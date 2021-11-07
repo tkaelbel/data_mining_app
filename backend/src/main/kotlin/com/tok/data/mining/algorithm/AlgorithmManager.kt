@@ -1,5 +1,7 @@
 package com.tok.data.mining.algorithm
 
+import com.tok.data.mining.algorithm.AlgorithmFactory
+import com.tok.data.mining.algorithm.AlgorithmName
 import com.tok.data.mining.payload.request.AlgorithmRequest
 import com.tok.data.mining.payload.response.AlgorithmResponse
 import org.springframework.stereotype.Component

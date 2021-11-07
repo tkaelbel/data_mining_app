@@ -97,7 +97,7 @@ class MongoDbManager(
     }
 
 
-    data class CollectionColumnDataModel(val column: String, val data: List<Any>)
+
 
 }
 
