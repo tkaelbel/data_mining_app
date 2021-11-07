@@ -2,6 +2,10 @@
 
 UI to use different data mining algorithms
 
+![database-view](./img/database-view.png?raw=true)
+
+![apriori-view](./img/apriori-view.png?raw=true)
+
 ## Install the dependencies
 ```bash
 yarn
